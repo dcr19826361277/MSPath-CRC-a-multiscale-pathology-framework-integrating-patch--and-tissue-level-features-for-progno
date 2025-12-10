@@ -108,9 +108,3 @@ The system follows the workflow illustrated in **Figure 1** of the paper, consis
 - Outputs C-index of each model and each feature combination.
 
 ---
-
-## 🚀 Running the Pipeline
-
-### **① Train the tissue classifier**
-```bash
-python resnet50_train.py

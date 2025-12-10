@@ -39,7 +39,7 @@ The system follows the workflow illustrated in **Figure 1** of the paper, consis
 ---
 ## 📊 Workflow Overview
 
-<img src="Fig/figure1.png" width="700">
+<img src="figure1.png" width="700">
 
 ## 📁 Module Descriptions
 

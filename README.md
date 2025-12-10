@@ -37,6 +37,9 @@ The system follows the workflow illustrated in **Figure 1** of the paper, consis
 6. **Multi-feature survival prediction**
 
 ---
+## 📊 Workflow Overview
+
+<img src="Fig/figure.png" width="700">
 
 ## 📁 Module Descriptions
 

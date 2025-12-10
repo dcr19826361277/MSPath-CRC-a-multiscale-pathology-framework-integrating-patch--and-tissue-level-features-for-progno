@@ -21,6 +21,104 @@ from PIL import Image
 import cv2
 import os
 
+model = models.resnet50(weights=True)
+
+model.fc = nn.Sequential(
+    nn.Linear(2048, 1024),
+    nn.Dropout(0.5),
+    nn.Linear(1024, 9)
+)
+model.load_state_dict(torch.load('./resnet50_weights.pth'))
+model = model.to('cuda')
+model.eval()
+
+preprocess = transforms.Compose([
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+])
+TCGA_COAD_PATH = './TCGA_COAD'
+foldername = os.listdir(TCGA_COAD_PATH)
+pathology_list = pd.read_csv('./pathology_list.csv', index_col = 'pathology')
+pathology_list_index = list(pathology_list.index)
+#print(len(pathology_list_index))
+
+#train
+TILE = []
+PATHOLOGY = []
+WIDTH_TILE = []
+HEIGHT_TILE = []
+X_TILE = []
+Y_TILE = []
+TISSUE = []
+
+for i in tqdm(range(0, len(foldername))):
+    if os.path.isdir(os.path.join(TCGA_COAD_PATH, foldername[i])):
+        filename = os.listdir(os.path.join(TCGA_COAD_PATH, foldername[i]))
+        
+        for j in range(0, len(filename)):
+            if filename[j][-3:len(filename[j])] == "svs":
+                if filename[j][0:23] not in pathology_list_index:
+                    continue
+                
+                slide = openslide.OpenSlide(os.path.join(TCGA_COAD_PATH, foldername[i], filename[j]))
+                try:
+                    magnification = int(slide.properties['aperio.AppMag'])
+                except:
+                    magnification = 20
+                factor = int(magnification/20)
+                    
+                [W, H] = slide.level_dimensions[0]
+                w = int(W*(20/magnification))
+                h = int(H*(20/magnification))
+                tile_number_width = w//224
+                tile_number_height = h//224
+                print(f'{filename[j][0:23]}: {tile_number_width}*{tile_number_height}')
+                
+                num = 0
+                for x in range(0, tile_number_width):
+                    for y in range(0, tile_number_height):
+                        num = num + 1
+                        TILE.append(filename[j][0:23] + '_' + str(num))
+                        PATHOLOGY.append(filename[j][0:23])
+                        WIDTH_TILE.append(tile_number_width)
+                        HEIGHT_TILE.append(tile_number_height)
+                        X_TILE.append(x+1)
+                        Y_TILE.append(y+1)
+                        
+                        location = (x*224*factor, y*224*factor)
+                        crop = slide.read_region(location = location, level = 0, size = (224*factor, 224*factor))
+                        crop = crop.convert("RGB")
+                        crop = crop.resize((224, 224))
+                
+                        # predict
+                        image_tensor = preprocess(crop)
+                        image_tensor.unsqueeze_(0)
+                        image_tensor = image_tensor.to('cuda')
+                        model = model.to('cuda')
+                        model.eval()
+                        
+                        with torch.no_grad():
+                            output = model(image_tensor)
+                            _, pred = torch.max(output, 1)
+                            
+                        pred = pred.item()
+                
+                        TISSUE.append(pred)
+
+DF = pd.DataFrame({
+    'tile': TILE,
+    'pathology': PATHOLOGY,
+    'width(tile)': WIDTH_TILE,
+    'height(tile)': HEIGHT_TILE,
+    'x(tile)': X_TILE,
+    'y(tile)': Y_TILE,
+    'tissue': TISSUE
+})
+os.mkdir('./WSI_tile_classification')
+for i in range(0, len(pathology_list_index)):
+    dataframe = DF[DF['pathology'] == pathology_list_index[i]]
+    dataframe.to_csv('./WSI_tile_classification/' + pathology_list_index[i] + '_tile_classification.csv', index=False)
+    
 WSI_TILE_CLASSIFICATION_PATH = './WSI_tile_classification'
 filename = os.listdir(WSI_TILE_CLASSIFICATION_PATH)
 # print(len(filename))
@@ -602,4 +700,5 @@ segmentation_feature = ['max_tumor_area',
 for feature in segmentation_feature:
     median_value = df[feature].median()
     df[feature] = df[feature].apply(lambda x: 1 if x > median_value else 0)
+
 df.to_csv('./segmentation_features10xx.csv', index=False)

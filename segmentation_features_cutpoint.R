@@ -2,7 +2,7 @@ library(survival)
 library(survminer)
 
 # Read csv
-data <- read.csv('E:/WSI-HSfeature/segmentation_features40x.csv')
+data <- read.csv('E:/dcr_test/segmentation_featuresrealxx.csv')
 
 # max_tumor_area
 mta_cutpoint = surv_cutpoint(
@@ -10,7 +10,7 @@ mta_cutpoint = surv_cutpoint(
   time = 'OS.time',
   event = 'OS',
   variables = 'max_tumor_area',
-  minprop = 0.1,
+  minprop = 0.01,
   progressbar = TRUE
 )
 print(mta_cutpoint)
@@ -31,7 +31,7 @@ lit_cutpoint = surv_cutpoint(
   time = 'OS.time',
   event = 'OS',
   variables = 'lymphocyte_inside_tumor',
-  minprop = 0.1,
+  minprop = 0.001,
   progressbar = TRUE
 )
 print(lit_cutpoint)
@@ -52,7 +52,7 @@ lat_cutpoint = surv_cutpoint(
   time = 'OS.time',
   event = 'OS',
   variables = 'lymphocyte_around_tumor',
-  minprop = 0.1,
+  minprop = 0.01,
   progressbar = TRUE
 )
 print(lat_cutpoint)
@@ -73,7 +73,7 @@ air_cutpoint = surv_cutpoint(
   time = 'OS.time',
   event = 'OS',
   variables = 'around_inside_ratio',
-  minprop = 0.1,
+  minprop = 0.01,
   progressbar = TRUE
 )
 print(air_cutpoint)
@@ -88,13 +88,97 @@ ggsurvplot(fit = air_fit,
            pval.method = TRUE,
            risk.table = TRUE)
 
+# max_Normal_area
+mna_cutpoint = surv_cutpoint(
+  data = data,
+  time = 'OS.time',
+  event = 'OS',
+  variables = 'max_Normal_area',
+  minprop = 0.01,
+  progressbar = TRUE
+)
+print(mna_cutpoint)
+plot(mna_cutpoint, 'max_Normal_area', palette = 'npg')
+
+mna_category = surv_categorize(mna_cutpoint)
+mna_fit <- survfit(Surv(OS.time, OS) ~ max_Normal_area, data = mna_category)
+ggsurvplot(fit = mna_fit,
+           data = mna_category,
+           surv.median.line = c('hv'),
+           pval = TRUE,
+           pval.method = TRUE,
+           risk.table = TRUE)
+
+# max_DEB_area
+mda_cutpoint = surv_cutpoint(
+  data = data,
+  time = 'OS.time',
+  event = 'OS',
+  variables = 'max_DEB_area',
+  minprop = 0.01,
+  progressbar = TRUE
+)
+print(mda_cutpoint)
+plot(mda_cutpoint, 'max_DEB_area', palette = 'npg')
+
+mda_category = surv_categorize(mda_cutpoint)
+mda_fit <- survfit(Surv(OS.time, OS) ~ max_DEB_area, data = mda_category)
+ggsurvplot(fit = mda_fit,
+           data = mda_category,
+           surv.median.line = c('hv'),
+           pval = TRUE,
+           pval.method = TRUE,
+           risk.table = TRUE)
+
+# max_MUC_area
+mma_cutpoint = surv_cutpoint(
+  data = data,
+  time = 'OS.time',
+  event = 'OS',
+  variables = 'max_MUC_area',
+  minprop = 0.01,
+  progressbar = TRUE
+)
+print(mma_cutpoint)
+plot(mma_cutpoint, 'max_MUC_area', palette = 'npg')
+
+mma_category = surv_categorize(mma_cutpoint)
+mma_fit <- survfit(Surv(OS.time, OS) ~ max_MUC_area, data = mma_category)
+ggsurvplot(fit = mma_fit,
+           data = mma_category,
+           surv.median.line = c('hv'),
+           pval = TRUE,
+           pval.method = TRUE,
+           risk.table = TRUE)
+
+# max_MUS_area
+msa_cutpoint = surv_cutpoint(
+  data = data,
+  time = 'OS.time',
+  event = 'OS',
+  variables = 'max_MUS_area',
+  minprop = 0.01,
+  progressbar = TRUE
+)
+print(msa_cutpoint)
+plot(msa_cutpoint, 'max_MUS_area', palette = 'npg')
+
+msa_category = surv_categorize(msa_cutpoint)
+msa_fit <- survfit(Surv(OS.time, OS) ~ max_MUS_area, data = msa_category)
+ggsurvplot(fit = msa_fit,
+           data = msa_category,
+           surv.median.line = c('hv'),
+           pval = TRUE,
+           pval.method = TRUE,
+           risk.table = TRUE)
+
 # total_stroma_area
 tsa_cutpoint = surv_cutpoint(
   data = data,
   time = 'OS.time',
   event = 'OS',
   variables = 'total_stroma_area',
-  minprop = 0.1,
+  minprop = 0.01,
   progressbar = TRUE
 )
 print(tsa_cutpoint)

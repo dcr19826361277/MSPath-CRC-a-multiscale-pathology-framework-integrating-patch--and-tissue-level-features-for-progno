@@ -1,4 +1,4 @@
-# MSPath-CRC: a multiscale pathology framework integrating patch- and tissue-level features for prognostic prediction in colorectal cancer
+# MSPath-CRC: a multiscale pathology framework for colorectal cancer prognosis
 
 This repository implements a complete multiscale deep-learning system for prognostic analysis of colorectal cancer (CRC) using whole-slide images (WSIs).  
 The pipeline includes tissue classification, multiscale patch extraction, deep feature generation, spatial tissue structure quantification, cutpoint computation, feature fusion, and survival modeling.
